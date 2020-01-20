@@ -1,0 +1,62 @@
+BootStrap: debootstrap
+OSVersion: xenial
+MirrorURL: http://archive.ubuntu.com/ubuntu/
+Include: bash
+
+%labels
+  Author Qi Li
+  Version v0.0.1
+
+
+%post
+  sed -i 's/main/main restricted universe/g' /etc/apt/sources.list
+  apt-get update
+
+
+  # Install R 3.2.3
+  apt-get install -yqq r-base-core 
+
+
+  apt-get install -yqq wget python python-dev python-pip git
+  apt-get clean
+
+
+  # Install cmake 3.12.2
+  wget https://cmake.org/files/v3.12/cmake-3.12.2-Linux-x86_64.tar.gz
+  tar zxvf cmake-3.12.2-Linux-x86_64.tar.gz
+  bash -c "mv cmake-3.12.2-Linux-x86_64 /usr/local/cmake-3.12.2"
+  ln -sf /usr/local/cmake-3.12.2/bin/*  /usr/bin/
+
+
+  # For R packages devtools
+  apt-get install -yqq libcurl4-openssl-dev libssl-dev libxml2-dev 
+  apt-get install -yqq libcurl4-gnutls-dev
+
+
+  # Install required R packages
+  R --slave -e 'install.packages(c("oro.dicom", "oro.nifti", "devtools"), repos="https://cloud.r-project.org/")'
+  R --slave -e 'install.packages(c("matrixStats","neurobase","R.utils","R.oo","R.methodsS3"), repos="https://cloud.r-project.org/")'
+  R --slave -e 'options(repos=structure(c(CRAN="https://cloud.r-project.org/"))); source("https://neuroconductor.org/neurocLite.R"); neuro_install("fslr")'
+
+
+  # Install fsl
+  wget https://fsl.fmrib.ox.ac.uk/fsldownloads/fslinstaller.py
+  python fslinstaller.py --dest=/usr/local/fsl
+
+
+  # Install ANTs
+  workingDir=${PWD}
+  git clone https://github.com/ANTsX/ANTs.git
+  bash -c "mkdir build install
+  cd build 
+  cmake \
+    -DCMAKE_INSTALL_PREFIX=${workingDir}/install \
+    ../ANTs 2>&1 | tee cmake.log
+  make -j 4 2>&1 | tee build.log
+  cd ANTS-build
+  make install 2>&1 | tee install.log"
+
+
+%environment
+  export PATH=$PATH:/usr/local/fsl/bin
+  export PATH=$PATH://install/bin
