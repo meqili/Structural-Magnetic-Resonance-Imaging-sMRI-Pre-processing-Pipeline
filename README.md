@@ -55,3 +55,5 @@ Rscript Scripts/bet_n_reg.R 2.Correction/S623901-cor.nii.gz template/resized_tem
 #With Singularity: 
 singularity exec preprocess.img Rscript Scripts/bet_n_reg.R 2.Correction/S623901-cor.nii.gz template/resized_template110_110_110.nii.gz  3.BrianExtraction/S623901-bet 4.Registration/S623901-reg
 ```
+
+The downstream analysis like image classification and discriminative visualization are also provided, please check this [link](https://github.com/liqi814/Deep-3D-CNNs-for-MRI-Classification-with-Alzheimer-s-Disease-And-Grad-CAM-Visualization).
